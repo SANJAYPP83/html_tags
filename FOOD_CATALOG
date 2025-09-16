@@ -1,0 +1,452 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delicious Eats - Indian Food Catalog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card-hover {
+            transition: all 0.4s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-12px) rotateY(2deg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 50%, #4ecdc4 100%);
+            animation: gradient 6s ease infinite;
+            background-size: 200% 200%;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .food-image {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            overflow: hidden;
+        }
+        .food-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,154,86,0.1), rgba(78,205,196,0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .food-card:hover .food-image::before {
+            opacity: 1;
+        }
+        .price-tag {
+            background: linear-gradient(45deg, #ff6b6b, #ff9a56);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+        }
+        .nav-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #ff9a56);
+            color: white;
+            transform: scale(1.05);
+        }
+        .floating-spice {
+            position: absolute;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.1;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        .search-glow:focus {
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-orange-50 via-red-50 to-teal-50 min-h-screen relative overflow-x-hidden">
+    <!-- Floating decorative elements -->
+    <div class="floating-spice text-6xl" style="top: 10%; left: 5%;">🌶️</div>
+    <div class="floating-spice text-4xl" style="top: 20%; right: 10%; animation-delay: -2s;">🧄</div>
+    <div class="floating-spice text-5xl" style="top: 60%; left: 8%; animation-delay: -4s;">🌿</div>
+    <div class="floating-spice text-3xl" style="bottom: 20%; right: 5%; animation-delay: -1s;">⭐</div>
+
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-2xl relative overflow-hidden">
+        <div class="container mx-auto px-6 py-12 relative z-10">
+            <div class="text-center">
+                <h1 class="text-6xl font-bold mb-4 drop-shadow-lg">🍛 Delicious Eats</h1>
+                <p class="text-xl opacity-95 mb-6">स्वादिष्ट भारतीय व्यंजनों का खजाना</p>
+                <p class="text-lg opacity-90">Authentic Indian flavors delivered to your doorstep</p>
+            </div>
+        </div>
+        <div class="absolute inset-0 bg-black opacity-10"></div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-20 border-b border-orange-100">
+        <div class="container mx-auto px-6 py-6">
+            <div class="flex justify-center flex-wrap gap-4">
+                <button class="nav-btn px-6 py-3 rounded-full text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 hover:scale-105 active" data-category="all">🍽️ All Items</button>
+                <button class="nav-btn px-6 py-3 rounded-full text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 hover:scale-105" data-category="appetizers">🥗 Starters</button>
+                <button class="nav-btn px-6 py-3 rounded-full text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 hover:scale-105" data-category="mains">🍛 Main Course</button>
+                <button class="nav-btn px-6 py-3 rounded-full text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 hover:scale-105" data-category="desserts">🍮 Desserts</button>
+                <button class="nav-btn px-6 py-3 rounded-full text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 hover:scale-105" data-category="beverages">🥤 Beverages</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <!-- Search Bar -->
+        <div class="mb-12">
+            <div class="max-w-lg mx-auto relative">
+                <input type="text" id="searchInput" placeholder="Search for delicious Indian food..." 
+                       class="w-full px-6 py-4 border-2 border-orange-200 rounded-full focus:outline-none focus:ring-4 focus:ring-orange-300/50 focus:border-orange-400 search-glow text-lg bg-white/80 backdrop-blur-sm">
+                <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-2xl">🔍</div>
+            </div>
+        </div>
+
+        <!-- Food Grid -->
+        <div id="foodGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Food items will be generated here -->
+        </div>
+
+        <!-- No results message -->
+        <div id="noResults" class="hidden text-center py-16">
+            <div class="text-8xl mb-6">🔍</div>
+            <h3 class="text-3xl font-bold text-gray-600 mb-4">कोई आइटम नहीं मिला</h3>
+            <p class="text-gray-500 text-lg">Try adjusting your search or filter criteria</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-12 mt-20">
+        <div class="container mx-auto px-6 text-center">
+            <div class="text-4xl mb-4">🍛</div>
+            <p class="text-gray-300 text-lg">&copy; 2024 Delicious Eats. Made with ❤️ for Indian food lovers.</p>
+            <p class="text-gray-400 mt-2">भारतीय स्वाद का असली मजा</p>
+        </div>
+    </footer>
+
+    <script>
+        // Indian street food and snacks data with rupees - Front page favorites first
+        const foodItems = [
+            {
+                id: 1,
+                name: "Samosa",
+                category: "appetizers",
+                price: "₹25",
+                description: "Golden crispy triangular pastry filled with spiced potatoes and green peas",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&h=300&fit=crop",
+                rating: 4.8
+            },
+            {
+                id: 2,
+                name: "Pakora (Mixed)",
+                category: "appetizers",
+                price: "₹80",
+                description: "Crispy fritters made with onion, potato and spinach in gram flour batter",
+                image: " https://www.bing.com/th/id/OIP.atnwlmYMWWReYC1V55VDawHaHa?w=204&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2",
+                rating: 4.6
+            },
+            {
+                id: 3,
+                name: "Aloo Tikki",
+                category: "appetizers",
+                price: "₹40",
+                description: "Spiced potato patties served with tangy tamarind and mint chutney",
+                image: " https://th.bing.com/th/id/OSK.HERO2SnDmF2uvyc_H5ksU_6cvlami1AqCJ3eyGLs6FsbEdk?w=472&h=280&c=13&rs=2&o=6&dpr=1.3&pid=SANGAM",
+                rating: 4.7
+            },
+            {
+                id: 4,
+                name: "Chaat Papri",
+                category: "appetizers",
+                price: "₹60",
+                description: "Crispy wafers topped with yogurt, chutneys, sev and spices",
+                image: " https://th.bing.com/th/id/OIP.S2iXijEZSXGGINh_rgjLpAHaFW?w=248&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+                rating: 4.5
+            },
+            {
+                id: 5,
+                name: "Pani Puri",
+                category: "appetizers",
+                price: "₹50",
+                description: "6 pieces of crispy puris with spiced water, chutneys and fillings",
+                image: " https://tse2.mm.bing.net/th/id/OIP.4S33u5tNGEV5wlD--vVEEgHaHz?rs=1&pid=ImgDetMain&o=7&rm=3",
+                rating: 4.9
+            },
+            {
+                id: 6,
+                name: "Bhel Puri",
+                category: "appetizers",
+                price: "₹70",
+                description: "Puffed rice mixed with sev, vegetables, chutneys and spices",
+                image: " https://i2.wp.com/vegecravings.com/wp-content/uploads/2018/06/Bhel-Puri-Recipe-Step-By-Step-Instructions.jpg?fit=1972%2C1874&ssl=1",
+                rating: 4.4
+            },
+            {
+                id: 7,
+                name: "Vada Pav",
+                category: "appetizers",
+                price: "₹35",
+                description: "Mumbai's favorite - spiced potato dumpling in a bun with chutneys",
+                image: " https://imgk.timesnownews.com/custom_thumb1628613982.jpg",
+                rating: 4.6
+            },
+            {
+                id: 8,
+                name: "Dahi Bhalla",
+                category: "appetizers",
+                price: "₹85",
+                description: "Soft lentil dumplings in creamy yogurt with sweet and tangy chutneys",
+                image: " https://tse2.mm.bing.net/th/id/OIP.vjnegVAiJyf35P0jmCQMIwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
+                rating: 4.8
+            },
+            {
+                id: 9,
+                name: "Masala Chai",
+                category: "beverages",
+                price: "₹20",
+                description: "Aromatic spiced tea brewed with cardamom, ginger and milk",
+                image: "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=400&h=300&fit=crop",
+                rating: 4.9
+            },
+            {
+                id: 10,
+                name: "Lassi (Sweet)",
+                category: "beverages",
+                price: "₹65",
+                description: "Traditional yogurt drink blended with sugar and cardamom",
+                image: " https://www.indianveggiedelight.com/wp-content/uploads/2023/01/sweet-lassi-recipe-featured.jpg",
+                rating: 4.5
+            },
+            {
+                id: 11,
+                name: "Chole Bhature",
+                category: "mains",
+                price: "₹120",
+                description: "Spicy chickpea curry served with fluffy deep-fried bread",
+                image: " https://th.bing.com/th/id/OIP.pUmQnkIngDk7X1QkX7FycwHaEK?w=327&h=183&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+                rating: 4.8
+            },
+            {
+                id: 12,
+                name: "Rajma Chawal",
+                category: "mains",
+                price: "₹150",
+                description: "Red kidney bean curry served with steamed basmati rice",
+                image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=300&fit=crop",
+                rating: 4.6
+            },
+            {
+                id: 13,
+                name: "Butter Chicken",
+                category: "mains",
+                price: "₹280",
+                description: "Creamy tomato-based curry with tender chicken pieces",
+                image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&h=300&fit=crop",
+                rating: 4.9
+            },
+            {
+                id: 14,
+                name: "Paneer Butter Masala",
+                category: "mains",
+                price: "₹220",
+                description: "Cottage cheese cubes in rich tomato and butter gravy",
+                image: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=400&h=300&fit=crop",
+                rating: 4.7
+            },
+            {
+                id: 15,
+                name: "Gulab Jamun",
+                category: "desserts",
+                price: "₹60",
+                description: "Soft milk dumplings soaked in rose-flavored sugar syrup",
+                image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop",
+                rating: 4.8
+            },
+            {
+                id: 16,
+                name: "Jalebi",
+                category: "desserts",
+                price: "₹80",
+                description: "Crispy spiral-shaped sweets soaked in saffron sugar syrup",
+                image: "https://images.unsplash.com/photo-1571091655789-405eb7a3a3a8?w=400&h=300&fit=crop",
+                rating: 4.6
+            },
+            {
+                id: 17,
+                name: "Kulfi",
+                category: "desserts",
+                price: "₹45",
+                description: "Traditional Indian ice cream with cardamom and pistachios",
+                image: "https://images.unsplash.com/photo-1571091655789-405eb7a3a3a8?w=400&h=300&fit=crop",
+                rating: 4.7
+            },
+            {
+                id: 18,
+                name: "Nimbu Paani",
+                category: "beverages",
+                price: "₹30",
+                description: "Refreshing lemon water with mint, black salt and ice",
+                image: " data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUSExMVFRUXFxcVFRcXFhcVFRUVFxUWFhUXFRUYHSggGBolHRUVITEhJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGhAQGy0lICUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIALcBEwMBIgACEQEDEQH/xAAcAAABBQEBAQAAAAAAAAAAAAAEAAIDBQYBBwj/xABEEAABAwIEAwQIAwQHCQEAAAABAAIRAwQFEiExQVFhBnGBkRMUIjKhsdHwUsHhByNCgjNicqKjwsMWJENTkpOy0vEV/8QAGQEAAwEBAQAAAAAAAAAAAAAAAQIDAAQF/8QAKhEAAgICAgEDAgYDAAAAAAAAAAECEQMhEjETBEFRMvAUImFxgZEzocH/2gAMAwEAAhEDEQA/AKtvZZn4UVR7NMH8K2YtwnOoBeCub9zmMLdYUBw+Cz97ZgHZeg4uAAVhMUuNSunDCRkDBkRCOtb7IqQ3ahfcEldigG6NrRxUOCFubuT0VVYtcRoNEe+1eRoE1FVLQn3ICCrXEqK5ovbuCgTX1RozkGekScZULHKQu2QbJSkw20o6J9ajopLHZTXOyyZWPRm7hkFDudCNuxqVWVwnBMm9N1XfWwgJSp0nOIa0FxOgA1JKz62c9FgL0ImjeLT4P+zkBofd1MpIkU27jbRx+kK3b2Hsjo01AfxST36TC5n6iCdB8LZiWXmqNtq0q5vewbd6NeTyeInfj5Kn9TfRdkqCD5/ZXRgzRm6TB43HsLfW0VNiNwrC4fDVm72rqVbLIvBCfeJetyuWOCXFbVlMxzOgRruy123X0c9xlc3OPyI427O4bVl4XpWA6lq80w20qNqta5jm94hep4FRgtVsbQOJ6ThjPZCOqM0Vfhb/AGQrB79FjoRie1VHQledVB7S9P7SvGUrzG594qL7G9hriowdVypVQprp0yUmWAhJV4u+qSNoSz0cHinOdKAZcghRvvIC4EhqGYiAZWAxmlqdFsrq4lZjExmOytFmSMu4LlJvtCVZ1bJBVKUFXTFkjTYWQYC1lvTblELzmzxHKR0WktMfaQBMLMpFlnidFpbsFg8TphrtO5aXE8YbENMrGYleyUYgYZRepnKotrtFesLNE2i6tKqnr1NEBZ6oqqNEEVj0VdwdVX1wjrg6oKqmBIZaWzqjwxglxMAffBetdl+zlOzAe4B9c+8SJDOg0++qrewGAijSF3UE1Kg/dj8LeDvz8lr2UtDx358dNhx+q4M+VyfFdff3/v4FhH3YPUpmSTJnWTuNdZ+S606+R+/IqcGREQdY8dh80Jz14aLjaraK2Opt10/QSP0UeJ4YyuyHGHD3HceUHon06ggkieknfn3bp9F09U0JcWmgvfZgK+HuLSCCHAw4cQRwKiwfs41z89X3Qfd5lbbFKIbUzCZfTzHlmY5rBHUh/wAAhqNMAR9zxXZkzykiStNokGgAAgDYBStdpomSBv4JsiOsrk5bHEWtduJ+fmj8IMVMvl1Vc2oJ01RFCrBzbQc3lv8ACVbBmadAaPRbLYKe4qQELh5loKlu9l6YyMh2juDqsDdP1K3PaEbrCXh1KjLsZ9Ffc1YVe+tKLq0ySovV9VlZCTBCSkjhbFJGhTQ0MQlECtmWPw579FrcLo6arnaQ9j30yeCFdYk8FoadMKWhb6yimCzMjCjyVLi+Hlq9LdbhZrH7eQVRSMzzrLqnyprygQdAhC13JUtGTRpcBwNrgX1mAhwaacucBl1kw1w308loKXZO0O9CmT3PP+oqXsW57mVWOe4NGUtBcS1vvzlHDwWwbhxn3nEf1cx8iGkKLk7BYHS7I2zdfVKPHU0qhHiRUTBg9tMeq2g6/vAfIzC0VDCaThqytPP9/r/hwlXwOgBJpV/8b/1CZrI+kw7Kijg9ITFC220g1N+u2ijr4e3KCKFtOsgufHSNVb0be2aIyu7nOrfLMoK7rTi3+9V/N61SXYyZVW2CMeYNpa94dUP+ZE3nZCmGgi0oQSJM1NJPLMpqV1aT7LYPRzx/qK2dXzAQXRIIBLyNO8mU1NxZm9DX0QCGiIYA0cIA5JNDuChaTrHP8D/quPz8x/0fVy82TrYaOvBndMpkekgwRDuhka6Rx+ijh07nqYb9VXZSKkyTvMxroZiPFLB9hQSznvsd9PIIqg/WEMWkba9fvgjbR06ET3qMO6GbBcdcQaXMtf5Sz9EBB8UZ2ig1ok+wxrRHNxLnf+LfNVRZ1PmurIq7FJX1CmC83BHDghqrDzPmu2bPe3kAn5KUK2wBNI8kTSE7oOkdEbbuPwSQ3JDno2AtJo0ydyxvyCIvRopMNp5abW8mgeQhcv8AZe6ugIw+PnQrCXm63OP8VhL06qUuxn0RQuZOKjZUkwj6dCeKHNI5pMAldVgbQ8l1DyCAVpbQry0cAqRtwni9K8pZpEfIacXIAUtG/HBZX10lPF8QiszD5TXG/EbqjxG5zSqp9+SofWOafzsDysVS3BQ77IIsVwkawS+aTE8gbgdi5smBDgI9po48iZWosbYyPrPyVR2baawe0k+xlyzrAObQdOmy01nh7W76+EfEarvwLlFM7MW4poNoWw4geSdcW4LSICfTOXgD4u+qVw5rhEEdznfkV16KlfTso0IB8ApHW7fwjyhOZbRs9w/mefm5Q1rV52quHn9UtIAnW7eGniuV6QLYn4pMoPG9Qn+ULtQOIiQPArNKjA4LuM9UyqQOPzKkFM8fkmVGn8TvILzJ4n8MIM98840jQ8JULmag68p4bR+aKNtMSXfAfJcNDURMTzmY/VJDHt6CR0gQRy+9EdSLWDOdh4lx4NA5k/FMyNAJe5rBuS72YjryifuFXV7kveHAEMZ/Rg6En8bhz5Dhv3L6fE29hbG31GpBdUblc45jrMHQAeAAHgq4yrKtXLt0K9pOnBd84JvQiK+4qdPipLCruOYICLr0WBuo1QNNhJlo2UHjphJqQIdC0nZzD/SVA4+60gnq4bDuCz9GhVJgkNB3I1MdFusBexjQ0aAI+m9O4u5FLTNPTGiEvnaLovBG6r768HNejYDNY8N159iroK3OM3IKxeJUZKjIL6K20cNytDYREqloWqsqMgbrnlCVkHBlr6QJKrjqkm4s3jZUCUtUT6NNyLidNHnNEYBT8hUjWqUMU2agcUyu+gROVODClNQL6FNNNGmkeSjdSPJY3EvOw3v1R0b83fVbOm1Y7sYIqvHNnycPqtkx0L1fS/40d2H6ES5VGWJ4qLq6iwwNTHKdrUPV3QMRuKbKT0xKA6Qh61CdjCJXHBBxTMCPDxsWn+0D56KD0RbTDcxzfiG8kyY5Iyqhrh0BT8cUYAfTGbMS57vxOcXHpE6DwTXuTplMdusqXRhpTWlNe5LNAWMQ13ap9B4G/MqAmTKAv60EQVk9hLw3YGkqWjfxqCsLd4k4HdEYZc1aphjSVSxuJujjrgha2KOdxWeu3VafvsI68PNTWlwCJQsNMOrVSd1XV6gG6WIXOUSs5eYkU6QVZcPugE0Xreay1W/PNRC7PNKx1E2YvWc0ljfWzzSQoNHqrMCRNLs+OIW2Zh45KVtmF40YSPL8ZiRgLeSeMCHJbT1QJ3qgQeJm4GJ//FHJTswcD+Fa82gS9WCCxM3AxtXCuir6+EOW+qWwUJtByTcGgOJj8Gw91OoXHi0j4g/kr0FGYhaRSeRvGirKB0E8h8l6XpPoovi6ClwlPamPausqE0dkNX3RNHZC1d0WEgckpTTSFNJQCIFOK49sJmZYI2oEBde6j6ir7o/NLIwKFDVfClJQdTUqVgE13FMqGU/KuFCwkeVZ3HK0P34LSkrE9pXE1TCElaDFWypu7gyvXv2PYe2paCoR7Rc8HwcQF48+2ceC9s/Y5WbTtBTJ1zOnxcSq41XY7Rsr3AadRha5oIIgryLGMNdaVTTPuz7J5jl3r3N1w2JleX/tEumPOUQTKrKkFGKvQHCFnr2yIK0zQFBXpgpOQ6Rl2WJJ12RgsxEZVberjkuml0Qs1lOLEJK39CuLWCz6GyrkJxKaVxOkcbFC6mylKyYB0LkJJFHQRjgmQpCuQptCNEF63927u/NZ3KtHff0bu78ws8D9+S7MHRSBPSOi6d0qI0XHrpKEjSoHJ4qKJyDZhOcmOck5qblQMNdUUJcpi3oo3U0rMRlyAuj80Y8oC6KnN6MDPKgcn1HKAuUeRqO5lG+omuKictzDQ97tFWVrIOcSUc4oY1E8HY0RjLJgRdncOomabsqDdUXAZVaKWXFbtFcOEekIHSB8VU1C5xkkk8ypGMRLKaDZkivNIpzKBVlkCY9wCFjcQUUFw0QlWvWDiqy6x1jeIQ2akWXogksw/tQ2d0keMgflPpU1wuGsFlW4t1XXYwBxXnJzl7HClJmm9OE5tULJ1MbaOKGf2id/CPE/RUjDJ8DLFN+xuc4XDWHNYN+NViYzR3CE91y4DM97ucSVZY37sqvTyNo+7YNyFE/FGDiF5NWqGq4vcTvoJOgXadZ7CBmJbOsmYXJDPFz4voq/S17npt5ilN7HNkajTv4fFVbXLP0HatPUfNXrV6UI8SThxDaJSqFR005xVrARu3SBSKbKWzEqYU1tRJzlrMdkIW8rcAuVyUI4pJzoNHUBevR1V8BVN47Zc+SdIKRBUeoS5Ne9ROeubyDcR7nqJz1G56jc9bmHiPe9DOYd1ypUXTiLAIXT6eVthoYGlSAoGtiY4BCVMScdguoxd+tRumuxdo4rPVHPdwKhNi47lHiCy2vO0zRsqS77Q1H+6Cp2YY0b6qZlo0cEVFG5FDUdXfuSE1uEvduSVphTHJJN0CzPjAklfyktZjb1XmcrBPM9UBeVqg94QRr0I6K/wm5ZUAyiAB3ERvKrO0zHkgsGZrRuNZ5iFyOWrR0RSuqO4e01WTOxUdw7IJ4ITDb7Kz2TGuqCxtxJaSdADpMAT0S8tFeJd2dzmfMq8yh7SSRAGsLC4bcEH2ZJ4RqVqLBlQg5qbxmHLSVk9GaRWkQmPPBPqgiQdCDqOSieV4aTsZljhdSWjXY/mtVTKw2G1wGyeLvzW3oHQL3oSfFX8HFlWwlqcUxpTpVORKhFMcV0lMcUrkajhKic6F1zlE5yRyGoT3oV5TqhUD3KUslhSI6jlW379kZUequ/fsuWcx1EHe9WVPCh6IF053iW8mN3BjiTtr+qq7SialRjBxcAe7c/AFay4cS8wNBoInYQI8kIfS2xJunSMfd0H0zDh48ChC9au9tvSAt8tdvvVZnE8PdSOskH3TGh0kjv6JUmx4TTBXvQ3qPEzqpGvEooV16HpNJsMlYGLYDgu+jRmdG22FOqtLmkN6nX4SF18ybVIphTTnUY30XcYtXUdqgqRvlEBpG433CzdW7c4zmPnKTyrpEnOjRmmFGSAkaRgDoPkkLOBLtzsOXVDJnjBWyr0rYw1AuFwSvrwkAHXLoNANuGgQnrrfE8DwWjnUlaF5RoLzBJCZnHX8kkn4hG5xPTW0gxsCBzjSQqjHcSFOnvqdh0QFfGarWZSJjYzqsXjd/cVjAbA4Ql4Ns7VrsLp4kS4gaknYc+5arCeyte4IdVJps/vH6I79nHZNjKbK9QB1VzZnlm1AAPIQvRG041MABJJRT0LPK1pFbg+CUqAhjBPEnUnxRt9WDWmNTHRVOJ9o2tGWhD4MOf/A2P62xPcVke0faQvhjXZWncD+LqenRRllXS7NHDOW2UWI48TXLQ1ziCQ5wBLS4nYcwF2veVHCAxw6wVZWNoCARCtregRzUfyylfEeToztCo4AaHTovR7N8tHcq2nbuIjLPgjbRkAZtCBEdNI+XzXZHJZzz2HtKdmUTSu5lSyVD8yicUi5RuckbCkcc5QvcuucoHuUZMdI49ygqOXXOQ9ZyjJjKJC8k6AEnUwASdBJ0HQSqivcscT7QEDjMnwK1XZhv7x1T8Igd538I+fep8dwGldAnKGVd2vGgceAcOvMLRxppSf9AlKtGR7JYg19xSI0Ew4cQ4gxt1jzhapwIHn3gTA+IK80qWr6Fw1wDm1GvggaSRwI5r1CpXdXYyrQyejeJJMyCTruREct5nZXxwTjohPuwOmwuM/eqsKlgHUzTcA4kagnbxGshSsDabZkTtI3J6a6Iere8AZ5QN/uUZRjh2+xTz3G7CpbPIq03ZCSGPMa8vaaSJ6HXoEI8NDM4eDrEHfXkV69Qe1zcj4dOhDgHNPSOI+iz+KdjqecVbVraTgXF9MyabswG2pDIjSBGpHdZpRVxf8FYzZi8MtalX3GEzpMeyOftHSdVo34e4UxSbDZIBl243J04qYuuGaVaZYNphuToA4eyOHFP9I2CZiBGsOJPPoN+/TvMJT5X/ANBNtsp7zAHNHpPS0yHDNl9qes6acVisVwksqZ2xlkZgOGu46dF6bct9gyNT1B5k7LIXWhg7fe6Rz8ctICSktiw+H8RoJPM931SvH8lADSoU6lRrYJLS88CBoNOG5OnNQG5Dte9TyKU5cvYXI3ewO5OsqvuRx2jVHXLkFXIhdWMihU8XIAEDTvXFXP3SXR4YfAx6ybGd2grjcMby+CuWMHVPEIHp3Q6yuHU2gNIbGmokKmxrENCK1SpV5tEtaf5Wb8FeNbyTvR/cKUsXL3HjNL2POL3EHv8AZY3K2ZAjKB/Lx8UFRwqqXZvaJPGM3wXqNSyad2j5JU7UN2JHySrE46Q7yJmRw+2uRGVo05gtPzWkovuY9xgMcHTJ6+zorFo5gFTBg7k6xaJuZTufeOEZ2s6wD/lXMJwirTeajq3pXOEEbA8t9ldZCmub4LLEkByvVAxxSm05Xu9G7k/2fidD4FE064cJa4OHQg/JR16DXtyvAcORG3ceHgqW67KUXatLmHpDgPPVK1Il40Xxeo3vWcd2frt0Zcjxa5vxaSo6uE3n/Nae6rUH5pWmDxs0L6ihe9Zw4JeHeof+8/6pj+zlwd3z/OXfNyk4yYygy9qVgNyFXXWIMH8QPQaoCn2ZeNSPiP1Up7PPOkgeP0SPE2OoGu7Nt/3cOgj0ji4d05R4EN+KtQ2PaJgcJ38lE1gbDGwQ1gLdPZygAaD8uCYxwOup7+f0Tuo6ZyN7K7HMCoXNVtUlwIgvjTMW7a+A16KWu2Wlo0GpgaQSdVZRIDdAIMzwG+qDa3pMjzWbbf7imZe0sdMn75rltiXtEEQQdOUHY/fJWuJW0rIYvVFIiq6co0dHLgfA/Mrz4qUcnD+irXJWaxt/G3OeB+K1FlUzCSYjj0jivJG9sLRkEvc4cmiPAlAdpP2l1KzPRUG+jZtPEhengxZZO5L+CP7Gn/ad2vBb6vRcD+Ig8u5A4HihexmfUuaCT1jUxzMBeX1LsnUySd+vitXgvaW3Gjw6nAgaFzR5aq2fBNpNK396DFfJ6G25nxHlus3irIce8p9DtJZx/TtHgeXKNVU4j2ptnOdlLnDh7Op+i5Z4ckqdDRqwbHq2S1cJ1eQ0d2soB9wYmYnhuTq50k/znZB39V9y4aFrB7o4oihg7jET3QPyXfGKjBRYJwcuhOryNUNWerdvZqoeJHfA+BXXdl3Dd2boDHzhBcYirBJmdcUlf/7N/wBX++fqkm8sf1/or+Gl8o9acx8+yGx104dFynTeTqGgcYJnYbeM+S6kiWE0VAYhkcN53T4f04TvpvMb9PikkgElo038Y4bf2dY8dPNNd6TWAw7xqRx0mF1JEAiHzs384k8R0y/Fcc2pAgNB0JBJI7vspJIBE8VOAb59BHdrKeHvg7TOm8RIjxiUkkAnKef+LLtwneTx7o+Kk26fFJJKZHTU5qF+usffikkgwohI6n5KM+zuPikkkoY425B4kd4n5KbXlPd+q4kggvQmVAHBw95sx4jY9Fa2WSrq3Qj328iNwDySSSOKbVo580V2dvCBOmuvdrwhKi0hs8gkkkX1y/QgCPtS4xCwfb/JSbUYTJjXQpJIeGLlGXvY8X7Hk1KgSrK0tsnBp6OaHD4pJL1pzaYyigt1uXOkBrZ4AeyO6ZKsbPAHvEw0jwBSSXO5NlFFBY7Jg8B5qWn2YY0wcs9ySSVzkMoIs6ODNZxjwCPbTIGgB8AEkkGw0QXFy5v/AA5HMOHyKjpYiwmCC376LqSW2MkmT6ff/wASSSTWTP/Z",
+                rating: 4.3
+            },
+            {
+                id: 19,
+                name: "Sugarcane Juice",
+                category: "beverages",
+                price: "₹40",
+                description: "Fresh pressed sugarcane juice with ginger and mint",
+                image: "https://www.gravetics.com/wp-content/uploads/2021/05/Sugarcane-Juice--1536x864.jpg",
+                rating: 4.4
+            },
+            {
+                id: 20,
+                name: "Dhokla",
+                category: "appetizers",
+                price: "₹90",
+                description: "Soft and spongy steamed gram flour cake from Gujarat",
+                image: " https://images.herzindagi.info/image/2019/Jun/easy-instant-dhokla-recipe.jpg",
+                rating: 4.5
+            }
+        ];
+
+        let currentFilter = 'all';
+        let currentSearchTerm = '';
+
+        // Generate star rating with Indian touch
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            let stars = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '⭐';
+            }
+            if (hasHalfStar) {
+                stars += '⭐';
+            }
+            
+            return stars;
+        }
+
+        // Create food card HTML with enhanced styling
+        function createFoodCard(item) {
+            return `
+                <div class="food-card bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden card-hover border border-orange-100" data-category="${item.category}">
+                    <div class="food-image h-56 bg-gray-200 relative" style="background-image: url('${item.image}')">
+                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1">
+                            <span class="text-sm font-bold text-orange-600">${generateStars(item.rating)} ${item.rating}</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-xl font-bold text-gray-800 leading-tight">${item.name}</h3>
+                            <span class="text-2xl font-black price-tag">${item.price}</span>
+                        </div>
+                        <p class="text-gray-600 mb-4 leading-relaxed">${item.description}</p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold">Fresh</span>
+                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">Hot</span>
+                            </div>
+                            <button class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-2 rounded-full transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105">
+                                🛒 Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Filter and display food items
+        function displayFoodItems() {
+            const grid = document.getElementById('foodGrid');
+            const noResults = document.getElementById('noResults');
+            
+            let filteredItems = foodItems;
+            
+            // Apply category filter
+            if (currentFilter !== 'all') {
+                filteredItems = filteredItems.filter(item => item.category === currentFilter);
+            }
+            
+            // Apply search filter
+            if (currentSearchTerm) {
+                filteredItems = filteredItems.filter(item => 
+                    item.name.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
+                    item.description.toLowerCase().includes(currentSearchTerm.toLowerCase())
+                );
+            }
+            
+            if (filteredItems.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+            } else {
+                grid.innerHTML = filteredItems.map(createFoodCard).join('');
+                noResults.classList.add('hidden');
+            }
+        }
+
+        // Category filter event listeners
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove active class from all buttons
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                e.target.classList.add('active');
+                
+                currentFilter = e.target.dataset.category;
+                displayFoodItems();
+            });
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            currentSearchTerm = e.target.value;
+            displayFoodItems();
+        });
+
+        // Initialize the page
+        displayFoodItems();
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationDelay = Math.random() * 0.5 + 's';
+                        entry.target.classList.add('animate-fade-in');
+                    }
+                });
+            });
+
+            // Add animation keyframes
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fade-in {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in {
+                    animation: fade-in 0.6s ease-out forwards;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
